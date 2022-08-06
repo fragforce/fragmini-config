@@ -24,6 +24,7 @@ services:
     restart: unless-stopped
     depends_on:
       - vaultwarden
+      - netbox
     cap_add:
       - NET_ADMIN
     environment:
@@ -55,3 +56,21 @@ services:
       - /home/docker/postgres:/var/lib/postgresql/data
     expose:
       - 5432
+  netbox:
+    container_name: netbox
+    image: lscr.io/linuxserver/netbox
+    depends_on:
+      - postgres
+      - redis
+    env_file:
+      - /home/docker/.env.netbox
+    environment:
+      - CSRF_TRUSTED_ORIGINS=['https://netbox.fragforce.org']
+      - NETBOX_DELETE_LEGACY_DATA=1
+      - PUID=1000
+      - PGID=986
+      - TZ=Etc/UTC
+    expose:
+      - 8000
+    volumes:
+      - /home/docker/netbox:/config
