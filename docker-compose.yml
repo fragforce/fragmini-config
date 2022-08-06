@@ -1,0 +1,45 @@
+version: "3"
+services:
+  vaultwarden:
+    container_name: vaultwarden
+    image: vaultwarden/server
+    restart: unless-stopped
+    user: 1000:986
+    volumes:
+      - /home/docker/vaultwarden:/data
+    environment:
+      - "WEBSOCKET_ENABLE=true"
+      - "PGID=986"
+      - "PUID=1000"
+      - "TZ=/Etc/UTC"
+    env_file:
+      - /home/docker/vaultwarden/.env
+    expose:
+      - 3012
+      - 80
+      - 8080
+  swag:
+    container_name: swag
+    image: lscr.io/linuxserver/swag
+    restart: unless-stopped
+    depends_on:
+      - vaultwarden
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - "PGID=986"
+      - "PUID=1000"
+      - "TZ=Etc/UTC"
+      - "VALIDATION=dns"
+      - "DNSPLUGIN=cloudflare"
+      - "EMAIL=accounts@fragforce.org"
+      - "DHLEVEL=4096"
+      - "DOCKER_MODS=linuxserver/mods:swag-auto-reload"
+      - "URL=fragforce.org"
+      - "SUBDOMAINS=wildcard"
+    volumes:
+      - /home/docker/swag:/config
+    ports:
+      - "80:80"
+      - "443:443"
+
